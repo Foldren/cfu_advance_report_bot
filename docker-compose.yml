@@ -1,0 +1,53 @@
+version: "3.3"
+services:
+  bot:
+    build: .
+    container_name: advance_report_bot
+    image: advance_report_bot
+    restart: always
+    environment:
+      - TZ=Europe/Moscow
+    env_file:
+      - ./source/.env
+    depends_on:
+      - redis
+      - postgresql
+    networks:
+      - advance_report_network
+    volumes:
+      - /home/user/.volumes/advance_report_bot/source:/home
+    command: ["python", "bot.py"]
+
+  redis:
+    image: redis:alpine
+    container_name: advance_report_cache
+    restart: always
+    ports:
+      - 1000:6379
+    env_file:
+      - ./.env
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    networks:
+      - advance_report_network
+    volumes:
+      - /home/user/.databases/advance_report/redis:/data
+
+  postgresql:
+    image: postgres:alpine
+    container_name: advance_report_db
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - 2000:5432
+    environment:
+      POSTGRES_USER: ${PG_USERNAME}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DB}
+    networks:
+      - advance_report_network
+    volumes:
+      - /home/user/.databases/advance_report/postgresql:/var/lib/postgresql/data
+
+networks:
+  advance_report_network:

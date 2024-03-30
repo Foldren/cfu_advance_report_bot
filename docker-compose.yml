@@ -12,11 +12,9 @@ services:
     depends_on:
       - redis
       - postgresql
+    profiles: [rebuild]
     networks:
       - advance_report_network
-    volumes:
-      - /home/user/.volumes/advance_report_bot/source:/home
-    command: ["python", "bot.py"]
 
   redis:
     image: redis:alpine
@@ -30,7 +28,7 @@ services:
     networks:
       - advance_report_network
     volumes:
-      - /home/user/.databases/advance_report/redis:/data
+      - cache:/data
 
   postgresql:
     image: postgres:alpine
@@ -47,7 +45,11 @@ services:
     networks:
       - advance_report_network
     volumes:
-      - /home/user/.databases/advance_report/postgresql:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
+  cache:
 
 networks:
   advance_report_network:
